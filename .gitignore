@@ -1,2 +1,10 @@
 # tsv file
 # *.tsv
+
+.data
+.vector_cache
+data
+model_dict
+_MAXCOSX
+
+test*
