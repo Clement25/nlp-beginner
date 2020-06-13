@@ -121,8 +121,8 @@ class NLINetwork(nn.Module):
         assert len(prem_embed.size()), len(hypo_embed.size())==(3, 3)
         prem_packed = pack_padded_sequence(prem_embed, premlen, enforce_sorted=False)
         hypo_packed = pack_padded_sequence(hypo_embed, hypolen, enforce_sorted=False)
-        prem_lstm_out, _ , hypo_lstm_out, _ = self.biLSTM(prem_packed, self.prem_hidden),   \
-                                 self.biLSTM(hypo_packed, self.hypo_hidden) 
+        prem_lstm_out, _ = self.biLSTM(prem_packed, self.prem_hidden)
+        hypo_lstm_out, _ = self.biLSTM(hypo_packed, self.hypo_hidden) 
         prem_encoded, hypo_encoded = pad_packed_sequence(prem_lstm_out)[0],   \
                                 pad_packed_sequence(hypo_lstm_out)[0] # (max_seqlen, batch_size, embedding_size)
         return prem_encoded, hypo_encoded
