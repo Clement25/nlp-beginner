@@ -89,8 +89,8 @@ class NLINetwork(nn.Module):
         prem_embed, hypo_embed = self.embedding(prem), self.embedding(hypo) # (batch_size, max_seqlen, embedding_size)
         prem_encoded, hypo_encoded = self.encode(prem_embed, premlen, hypo_embed, hypolen)  # (batch_size, max_seqlen, 2*hidden_size)
 
-        assert prem_encoded.size()==(self.batch_size, premlen.max().item(), 2*self.hidden_size)
-        assert hypo_encoded.size()==(self.batch_size, hypolen.max().item(), 2*self.hidden_size)
+        # assert prem_encoded.size()==(self.batch_size, premlen.max().item(), 2*self.hidden_size)
+        # assert hypo_encoded.size()==(self.batch_size, hypolen.max().item(), 2*self.hidden_size)
 
         # mask for attention
         prem_att, hypo_att = self.attention(prem, hypo, prem_encoded, hypo_encoded) # (batch_size, max_seqlen, 2*hidden_size)
