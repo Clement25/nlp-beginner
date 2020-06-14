@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description='Parameters for training')
 parser.add_argument('--hidden_size', type=int, default=300, help='size of hidden state in LSTM')
 parser.add_argument('--dropout', type=float, default=0.5, help='drop out ratio in the model')
 parser.add_argument('--epochs', type=int, default=50, help='total training epochs')
-parser.add_argument('--batch_size', type=int, default=256, help='size of each training batch')
+parser.add_argument('--batch_size', type=int, default=32, help='size of each training batch')
 parser.add_argument('--lr', type=float, default=5e-4)
 parser.add_argument('--embedding_dim', type=int, default=50)
 parser.add_argument('--log_dir', type=str, default='./log')
@@ -76,7 +76,7 @@ def train_epoch(model, train_iter, train_size, optimizer, criterion, epoch, max_
 
 def validate(model, dev_iter, dev_size, criterion):
     model.eval()
-    device = model.device()
+    device = model.device
     epoch_start = time.time()
 
     running_loss = 0.0
@@ -107,7 +107,7 @@ def main():
         os.makedirs(log_dir)
     
     # Load data
-    snli = SNLIDataset(args.embedding_dim, device=DEVICE)
+    snli = SNLIDataset(args.embedding_dim, args.batch_size, device=DEVICE)
     train_iter, dev_iter, test_iter = snli.train_iter, snli.dev_iter, snli.test_iter
     train_size, dev_size, test_size = snli.train_size, snli.dev_size, snli.test_size
 
@@ -180,7 +180,7 @@ def main():
                         "epochs_count": epochs_count,
                         "train_losses": train_losses,
                         "valid_losses": valid_losses},
-                        os.path.join(args.target_dir, "best.pth.tar"))
+                        os.path.join(args.log_dir, "best.pth.tar"))
             # Save the model at each epoch.
         torch.save({"epoch": epoch,
                     "model": model.state_dict(),
@@ -189,7 +189,7 @@ def main():
                     "epochs_count": epochs_count,
                     "train_losses": train_losses,
                     "valid_losses": valid_losses},
-                    os.path.join(args.target_dir, "slni_{}.pth.tar.format(epoch)"))
+                    os.path.join(args.log_dir, "slni_{}.pth.tar.format(epoch)"))
         if patience_counter > args.patience:
             print("-> Early stopping: patience limit reached, stopping...")
             break

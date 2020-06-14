@@ -4,7 +4,7 @@ from torchtext.vocab import GloVe
 import torch
 
 class SNLIDataset(object):
-    def __init__(self, embedding_dim, device='cuda'):
+    def __init__(self, embedding_dim, batch_size, device='cuda'):
         super(SNLIDataset, self).__init__()
         # set up fields
         self.TEXT = data.Field(lower=True, include_lengths=True, batch_first=True)
@@ -20,7 +20,7 @@ class SNLIDataset(object):
 
         # make iterator for splits
         self.train_iter, self.dev_iter, self.test_iter =    \
-            data.BucketIterator.splits((self.train, self.dev, self.test), batch_size=32, device=device)
+            data.BucketIterator.splits((self.train, self.dev, self.test), batch_size=batch_size, device=device)
     
     @property
     def vocab_size(self):
