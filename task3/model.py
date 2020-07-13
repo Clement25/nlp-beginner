@@ -67,7 +67,7 @@ class NLINetwork(nn.Module):
         """
         super(NLINetwork, self).__init__()
         self.hidden_size = hidden_size
-        self.embedding_dim=embedding_dim
+        self.embedding_dim = embedding_dim
         self.bidirectional = bidirectional
         self.batch_size = batch_size
         self.device = device

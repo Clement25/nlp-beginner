@@ -5,7 +5,6 @@ import torch
 
 class SNLIDataset(object):
     def __init__(self, embedding_dim, batch_size, device='cuda'):
-        super(SNLIDataset, self).__init__()
         # set up fields
         self.TEXT = data.Field(lower=True, include_lengths=True, batch_first=True)
         self.LABEL = data.Field(sequential=False)
@@ -21,7 +20,7 @@ class SNLIDataset(object):
         # make iterator for splits
         self.train_iter, self.dev_iter, self.test_iter =    \
             data.BucketIterator.splits((self.train, self.dev, self.test), batch_size=batch_size, device=device)
-    
+
     @property
     def vocab_size(self):
         return len(self.TEXT.vocab)
@@ -55,7 +54,7 @@ class SNLIDataset(object):
         return self.TEXT.vocab.vectors
 
 if __name__ == '__main__':
-    ds = SNLIDataset(50)
+    ds = SNLIDataset(50, 128)
     itos = ds.TEXT.vocab.itos
     print(type(itos))
     print(len(itos))
