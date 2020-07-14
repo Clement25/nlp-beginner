@@ -102,7 +102,7 @@ class BLCC(nn.Module):
     """Implement the NER network proposed in the paper: <https://arxiv.org/pdf/1603.01354.pdf>
     """
     def __init__(self, num_word_embeddings, num_char_embeddings, num_class, 
-                    embedding_dim_word=100, embedding_dim_char=30,
+                    embedding_dim_word=100, embedding_dim_char=30, use_charemb=False,
                     window_size=3, bidirectional=True,
                     hidden_size=100, p=0.5, word_vectors=None, device='cuda'):
         """ 
@@ -122,6 +122,7 @@ class BLCC(nn.Module):
         self.char_embedding_layer = nn.Embedding.from_pretrained(self._init_char_embedding(num_char_embeddings, embedding_dim_char))
         self.char_embedding_layer.freeze = False
         self.num_class = num_class
+        self.use_charemb = use_charemb
         self.dropout = nn.Dropout(p)
         self.charCNN = nn.Conv1d(
                                     in_channels=embedding_dim_char, 
@@ -130,8 +131,7 @@ class BLCC(nn.Module):
                                     padding=window_size-1
                                 )
         self.BiLSTM = nn.LSTM(  
-                                embedding_dim_word, \
-                                # + embedding_dim_char, 
+                                embedding_dim_word + (embedding_dim_char if self.use_charemb else 0), 
                                 hidden_size, 
                                 num_layers=1, 
                                 bias=False,
@@ -162,11 +162,13 @@ class BLCC(nn.Module):
 
         word_repr = self.word_embedding_layer(input_word_raw)    # (batch_size, max_seqlen, embedding_dim_word)
 
-        char_repr = self._forward_char(input_char)   # (batch_size, max_seqlen, num_filters)
-        word_embeds = torch.cat([char_repr, word_repr], dim=-1) # (batch_size, max_seqlen, num_fiters+embedding_dim_word)
+        if self.use_charemb:
+            char_repr = self._forward_char(input_char)   # (batch_size, max_seqlen, num_filters)
+            word_embeds = torch.cat([char_repr, word_repr], dim=-1) # (batch_size, max_seqlen, num_fiters+embedding_dim_word)
+        else:
+            word_embeds = word_repr
 
         word_embeds = self.dropout(word_embeds)
-        # word_embeds = self.dropout(word_repr)
         packed_sequence = pack_padded_sequence(word_embeds, input_seqlen, batch_first=True, enforce_sorted=False)
         out, _ = self.BiLSTM(packed_sequence)  # (batch_size, max_seqlen, 2*hidden_size)
         lstm_out = pad_packed_sequence(out, batch_first=True)[0]   # (batch_size, seqlen, 2*hidden_size)

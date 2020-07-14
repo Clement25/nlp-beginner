@@ -11,7 +11,9 @@ test*
 task3/.data
 task3/task3.ipynb
 
-# task4/conll2003*
+# task4/conll2003_raw
 task4/.vector_cache
 task4/test.ipynb
-task4/log/*
+task4/run.sh
+task4/__pycache__
+# task4/log/

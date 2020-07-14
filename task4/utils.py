@@ -3,12 +3,12 @@ from torchtext.datasets import SequenceTaggingDataset
 from torchtext.vocab import GloVe, CharNGram
 import torch
 import torch.nn as nn
-import pdb
+import os, glob
 
 PAD_TOKEN="<pad>"
 
 class CONLL2003(object):
-    def __init__(self, batch_size=128, word_embedding_dim=100, tag_type='pos', path='conll2003_polished', \
+    def __init__(self, batch_size=128, word_embedding_dim=100, tag_type='pos', path='conll2003', \
                     sep_name={'train':'train.txt', 'valid':'valid.txt','test':'test.txt'},  \
                     device='cuda'):
         """
@@ -132,12 +132,12 @@ def init_linear_weights(m):
         torch.nn.init.xavier_uniform(m.weight)
         m.bias.data.fill_(0.0)
 
+def read_save():
+    for root in glob.glob(r'./log/ner*'):
+
+        state_dict = torch.load(os.path.join(root, "best.pth.tar"))
+        print("Experiment {}\n".format(root.split('/')[-1]))
+        print("Val acc: {:.4f}, Test acc: {:.4f}".format(state_dict.get("best_score",0.0), state_dict.get("test_acc",0.0)))
 
 if __name__ == '__main__':
-    ds = CONLL2003()
-    # 看一下token对应的embedding
-    # char_iter = ds.val_iter
-    train_iter = ds.train_iter
-    val_iter = ds.val_iter
-    for data1, data2 in zip(train_iter,val_iter):
-        pdb.set_trace()
+    read_save()

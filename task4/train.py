@@ -17,11 +17,13 @@ parser.add_argument('--batch_size', type=int, default=32, help='size of each tra
 parser.add_argument('--lr', type=float, default=1.5e-2, help='inital learning rate')
 parser.add_argument('--embedding_dim_word', type=int, default=100)
 parser.add_argument('--embedding_dim_char', type=int, default=30)
-parser.add_argument('--log_dir', type=str, default='./log')
+parser.add_argument('--log_root', type=str, default='./log', help='root path to place the log files')
+parser.add_argument('--data_root', type=str, default='./conll2003',help='root path to place the dataset')
 parser.add_argument('--checkpoint', type=str, default=False)
 parser.add_argument('--patience', type=int, default=5)
-parser.add_argument('--gamma', type=float,default=0.05, help='exponential decay coefficient')
-parser.add_argument('--max_grad_norm', type=float, default=5.0)
+parser.add_argument('--gamma', type=float,default=0.05, help='The coefficient for exponetial decay')
+parser.add_argument('--max_grad_norm', type=float, default=5.0, help='The maximum norm for gradient clipping')
+parser.add_argument('--use_charemb', type=bool, default=False, help='Whether to use char embedding in the model.')
 
 args = parser.parse_args()
 
@@ -107,37 +109,38 @@ def validate(model, dev_iter):
 
 def test(model, test_iter):
     # test the best model
-    torch.load(os.path.join(args.log_dir, "best.pth.tar"))
+    torch.load(os.path.join(args.log_root, "best.pth.tar"))
     epoch_time, epoch_accuracy = validate(model, test_iter)
     return epoch_time, epoch_accuracy
 
 def main():
-    log_dir = args.log_dir
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
+    log_root = args.log_root
+    if not os.path.exists(log_root):
+        os.makedirs(log_root)
     
     # Load data
     conll = CONLL2003(
                         batch_size=args.batch_size,
-                        word_embedding_dim=args.embedding_dim_word,  
-                        tag_type='pos',
+                        word_embedding_dim=args.embedding_dim_word,
+                        path=args.data_root,
+                        tag_type=args.tag_type,
                         device=DEVICE
                     )
     train_iter, dev_iter, test_iter = conll.train_iter, conll.val_iter, conll.test_iter
     train_size, dev_size, test_size = conll.train_size, conll.val_size, conll.test_size
 
     print("\t* Building model...")
-    model = BLCC(num_word_embeddings=conll.word_vocab_size,
+    model = BLCC(
+                    num_word_embeddings=conll.word_vocab_size,
                     num_char_embeddings=conll.char_vocab_size,
                     num_class=conll.num_class,
                     embedding_dim_word = args.embedding_dim_word,
                     embedding_dim_char=args.embedding_dim_char,
-                    # word_padding_idx=conll.word_padding_idx,
-                    # char_padding_idx=conll.char_padding_idx,
                     hidden_size=args.hidden_size,
                     p=args.dropout,
                     word_vectors=conll.word_vectors,
-                    device=DEVICE)
+                    device=DEVICE
+                )
     
     # Set up training
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
@@ -197,7 +200,7 @@ def main():
                         'best_score': best_score,
                         "epochs_count": epochs_count,
                         "train_losses": train_losses},
-                        os.path.join(args.log_dir, "best.pth.tar"))
+                        os.path.join(args.log_root, "best.pth.tar"))
             # Save the model at each epoch.
         torch.save({"epoch": epoch,
                     "model": model.state_dict(),
@@ -205,19 +208,27 @@ def main():
                     "optimizer": optimizer.state_dict(),
                     "epochs_count": epochs_count,
                     "train_losses": train_losses},
-                    os.path.join(args.log_dir, "conll_{}.pth.tar".format(epoch)))
+                    os.path.join(args.log_root, "conll_{}.pth.tar".format(epoch)))
         if patience_counter > args.patience:
             print("-> Early stopping: patience limit reached, stopping...")
             break
 
     # test the best model
-    load_file = torch.load(os.path.join(args.log_dir, "best.pth.tar"),map_location=DEVICE)
+    load_file = torch.load(os.path.join(args.log_root, "best.pth.tar"),map_location=DEVICE)
     state_dict = load_file['model']
     model.load_state_dict(state_dict)
     model = model.to(DEVICE)
-    time, accuracy = test(model, test_iter)
+    test_time, test_acc = test(model, test_iter)
+    torch.save({'epoch': epoch,
+                'model': model.state_dict(),
+                'best_score': best_score,
+                'test_acc': test_acc,
+                "epochs_count": epochs_count,
+                "train_losses": train_losses},
+                os.path.join(args.log_root, "best.pth.tar"))
+
     print("-> Test. time: {:.4f}s, accuracy: {:.4f}"    \
-                .format(time, accuracy))
+                .format(test_time, test_acc))
 
 
 if __name__ == "__main__":
