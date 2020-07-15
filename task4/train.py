@@ -18,7 +18,7 @@ parser.add_argument('--lr', type=float, default=1.5e-2, help='inital learning ra
 parser.add_argument('--embedding_dim_word', type=int, default=100)
 parser.add_argument('--embedding_dim_char', type=int, default=30)
 parser.add_argument('--log_root', type=str, default='./log', help='root path to place the log files')
-parser.add_argument('--data_root', type=str, default='./conll2003',help='root path to place the dataset')
+parser.add_argument('--data_root', type=str, default='./conll2003_polished',help='root path to place the dataset')
 parser.add_argument('--checkpoint', type=str, default=False)
 parser.add_argument('--patience', type=int, default=5)
 parser.add_argument('--gamma', type=float,default=0.05, help='The coefficient for exponetial decay')

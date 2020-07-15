@@ -1,5 +1,11 @@
 # BiLSTM-CRF for NER/POS
 
+## Get Dataset
+The provided dataset is a polished version in which we remove all "DOCSTART" sentences. To get the raw dataset and place into one destination, run the script in this folder.
+```
+sh download_dataset.sh <data_root>
+```
+
 ## Implementation Details
 The model is based on the paper [_"End-to-end Sequence Labeling via Bi-directional LSTM-CNNs-CRF"_](https://arxiv.org/pdf/1603.01354.pdf)
 
