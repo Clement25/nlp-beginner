@@ -1,7 +1,7 @@
 # BiLSTM-CRF for NER/POS
 
 ## Get Dataset
-The provided dataset is a polished version in which we remove all "DOCSTART" sentences. To get the raw dataset and place into one destination, run the script in this folder.
+The provided dataset is a polished version in which we remove all "DOCSTART" sentences. To get the raw dataset and place that into a target directory, run the script in this folder.
 ```
 sh download_dataset.sh <data_root>
 ```
