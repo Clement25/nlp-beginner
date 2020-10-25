@@ -1,4 +1,4 @@
-# NLP-Beginner：自然语言处理入门练习
+# NLP-Beginner Solution：自然语言处理入门练习解答
 
 ## 任务列表
 * 任务一：基于机器学习（TF-IDF&SGD）的文本分类
