@@ -1,5 +1,7 @@
 # NLP-Beginner Solution：自然语言处理入门练习解答
 
+复旦大学邱锡鹏老师”自然语言入门练习“的解答，原repo地址 <https://github.com/FudanNLP/nlp-beginner>
+
 ## 任务列表
 * 任务一：基于机器学习（TF-IDF&SGD）的文本分类
 
